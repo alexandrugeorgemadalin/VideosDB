@@ -1,0 +1,9 @@
+Starting audit...
+[ERROR] /home/george/Desktop/POO/teme/teme/tema1/Tema-POO-2020/./src/main/Commands.java:17:5: Missing a Javadoc comment. [MissingJavadocMethod]
+[ERROR] /home/george/Desktop/POO/teme/teme/tema1/Tema-POO-2020/./src/main/Commands.java:43:5: Missing a Javadoc comment. [MissingJavadocMethod]
+[ERROR] /home/george/Desktop/POO/teme/teme/tema1/Tema-POO-2020/./src/main/Commands.java:64:5: Missing a Javadoc comment. [MissingJavadocMethod]
+[ERROR] /home/george/Desktop/POO/teme/teme/tema1/Tema-POO-2020/./src/main/Commands.java:84:5: Missing a Javadoc comment. [MissingJavadocMethod]
+[ERROR] /home/george/Desktop/POO/teme/teme/tema1/Tema-POO-2020/./src/main/Main.java:10:8: Unused import - org.json.simple.JSONObject. [UnusedImports]
+[ERROR] /home/george/Desktop/POO/teme/teme/tema1/Tema-POO-2020/./src/main/Main.java:18:8: Unused import - java.util.Map. [UnusedImports]
+Audit done.
+Checkstyle ends with 6 errors.
