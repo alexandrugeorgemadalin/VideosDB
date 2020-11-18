@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Objects;
 
 /**
@@ -27,6 +28,7 @@ public final class Main {
 
     /**
      * Call the main checker and the coding style checker
+     *
      * @param args from command line
      * @throws IOException in case of exceptions to reading / writing
      */
@@ -71,6 +73,45 @@ public final class Main {
         JSONArray arrayResult = new JSONArray();
 
         //TODO add here the entry point to your implementation
+
+        for (int i = 0; i < input.getCommands().size(); i++) {
+            if (input.getCommands().get(i).getActionType().equals("command")) {
+                if (input.getCommands().get(i).getType().equals("favorite")) {
+                    String title = input.getCommands().get(i).getTitle();
+                    String user = input.getCommands().get(i).getUsername();
+                    int id = input.getCommands().get(i).getActionId();
+                    Commands commands = new Commands();
+                    commands.addfavorite(id, title, user, input.getUsers(),
+                            arrayResult, fileWriter);
+                }
+                if (input.getCommands().get(i).getType().equals("view")) {
+                    String title = input.getCommands().get(i).getTitle();
+                    String user = input.getCommands().get(i).getUsername();
+                    int id = input.getCommands().get(i).getActionId();
+                    Commands commands = new Commands();
+                    commands.view(id, title, user, input.getUsers(),
+                            arrayResult, fileWriter);
+                }
+                if (input.getCommands().get(i).getType().equals("rating")) {
+                    ArrayList<Rating.Movie> movieratings = new ArrayList<Rating.Movie>();
+                    ArrayList<Rating.Show> showratings = new ArrayList<Rating.Show>();
+                    String title = input.getCommands().get(i).getTitle();
+                    String user = input.getCommands().get(i).getUsername();
+                    Double rating = input.getCommands().get(i).getGrade();
+                    int id = input.getCommands().get(i).getActionId();
+                    int season = input.getCommands().get(i).getSeasonNumber();
+                    Commands commands = new Commands();
+                    if (season == 0) {
+                        commands.ratingmovie(id, title, user, rating,
+                                movieratings, input.getUsers(), arrayResult, fileWriter);
+                    } else {
+                        commands.ratingshow(id, title, season, user, rating,
+                                showratings, input.getUsers(), arrayResult, fileWriter);
+                    }
+                }
+            }
+
+        }
 
         fileWriter.closeJSON(arrayResult);
     }
