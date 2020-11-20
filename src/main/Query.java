@@ -925,7 +925,6 @@ public class Query {
                     }
                 }
                 if (ratings != 0) {
-                    System.out.println(user.getUsername());
                     User u = new User(user.getUsername(), ratings);
                     ratedusers.add(u);
                 }
