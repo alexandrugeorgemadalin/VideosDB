@@ -7,7 +7,6 @@ import fileio.Writer;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -68,13 +67,29 @@ public final class Commands {
         for (UserInputData user : usersData) {
             if (user.getUsername().equals(username)) {
                 if (user.getHistory().containsKey(title)) {
-                    Map<String, Double> data = new HashMap<>();
-                    data.put(username, rating);
-                    Rating.Movie movie = new Rating.Movie(title, data);
-                    ratings.add(movie);
+                    Rating.Movie movie = new Rating.Movie(title, username, rating);
+                    int error = 0;
+                    for (Rating.Movie m : ratings) {
+                        if (m.getName().equals(title)) {
+                            if (m.getUsername().equals(username)) {
+                                result = fileWriter.writeFile(id, "message",
+                                        "error -> " + title + " has been already rated");
+                                arrayResult.add(result);
+                                error = 1;
+                                break;
+                            }
+                        }
+                    }
+                    if (error == 0) {
+                        ratings.add(movie);
+                        result = fileWriter.writeFile(id, "message",
+                                "success -> " + title + " was rated with " + rating
+                                        + " by " + username);
+                        arrayResult.add(result);
+                    }
+                } else {
                     result = fileWriter.writeFile(id, "message",
-                            "success -> " + title + " was rated with " + rating
-                                    + " by " + username);
+                            "error -> " + title + " is not seen");
                     arrayResult.add(result);
                 }
             }
@@ -82,6 +97,7 @@ public final class Commands {
     }
 
     public void ratingshow(final int id, final String title, final int season,
+                           final int seasonnumber,
                            final String username, final double rating,
                            final ArrayList<Rating.Show> ratings,
                            final List<UserInputData> usersData, final JSONArray arrayResult,
@@ -89,13 +105,30 @@ public final class Commands {
         for (UserInputData user : usersData) {
             if (user.getUsername().equals(username)) {
                 if (user.getHistory().containsKey(title)) {
-                    Map<String, Double> data = new HashMap<>();
-                    data.put(username, rating);
-                    Rating.Show show = new Rating.Show(title, season, data);
-                    ratings.add(show);
+                    Rating.Show show = new Rating.Show(title, season, seasonnumber,
+                            username, rating);
+                    int error = 0;
+                    for (Rating.Show s : ratings) {
+                        if (s.getName().equals(title)) {
+                            if (s.getUsername().equals(username)) {
+                                result = fileWriter.writeFile(id, "message",
+                                        "error -> " + title + " has been already rated");
+                                arrayResult.add(result);
+                                error = 1;
+                                break;
+                            }
+                        }
+                    }
+                    if (error == 0) {
+                        ratings.add(show);
+                        result = fileWriter.writeFile(id, "message",
+                                "success -> " + title + " was rated with " + rating
+                                        + " by " + username);
+                        arrayResult.add(result);
+                    }
+                } else {
                     result = fileWriter.writeFile(id, "message",
-                            "success -> " + title + " was rated with " + rating
-                                    + " by " + username);
+                            "error -> " + title + " is not seen");
                     arrayResult.add(result);
                 }
             }

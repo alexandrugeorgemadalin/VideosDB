@@ -1,16 +1,17 @@
 package main;
 
-import java.util.Map;
-
 public class Rating {
 
     static class Movie {
         private String name;
-        private Map<String, Double> data;
+        private String username;
+        private Double rating;
+        private Double averagerating = 0.00;
 
-        Movie(final String name, final Map data) {
+        Movie(final String name, final String username, final Double rating) {
             this.name = name;
-            this.data = data;
+            this.username = username;
+            this.rating = rating;
         }
 
         public String getName() {
@@ -21,24 +22,46 @@ public class Rating {
             this.name = name;
         }
 
-        public Map<String, Double> getData() {
-            return data;
+        public String getUsername() {
+            return username;
         }
 
-        public void setData(final Map<String, Double> data) {
-            this.data = data;
+        public void setUsername(final String username) {
+            this.username = username;
+        }
+
+        public Double getRating() {
+            return rating;
+        }
+
+        public Double getAveragerating() {
+            return averagerating;
+        }
+
+        public void setAveragerating(final Double averagerating) {
+            this.averagerating = averagerating;
+        }
+
+        public void setRating(final Double rating) {
+            this.rating = rating;
         }
     }
 
     static class Show {
         private String name;
+        private int seasonnumber;
         private int season;
-        private Map<String, Double> data;
+        private String username;
+        private Double rating;
+        private Double averagerating = 0.00;
 
-        Show(final String name, final int season, final Map<String, Double> data) {
+        Show(final String name, final int season, final int seasonnumber,
+             final String username, final Double rating) {
             this.name = name;
             this.season = season;
-            this.data = data;
+            this.username = username;
+            this.rating = rating;
+            this.seasonnumber = seasonnumber;
         }
 
         public String getName() {
@@ -57,12 +80,37 @@ public class Rating {
             this.season = season;
         }
 
-        public Map<String, Double> getData() {
-            return data;
+        public int getSeasonnumber() {
+            return seasonnumber;
         }
 
-        public void setData(final Map<String, Double> data) {
-            this.data = data;
+        public void setSeasonnumber(final int seasonnumber) {
+            this.seasonnumber = seasonnumber;
         }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(final String username) {
+            this.username = username;
+        }
+
+        public Double getRating() {
+            return rating;
+        }
+
+        public void setRating(final Double rating) {
+            this.rating = rating;
+        }
+
+        public Double getAveragerating() {
+            return averagerating;
+        }
+
+        public void setAveragerating(final Double averagerating) {
+            this.averagerating = averagerating;
+        }
+
     }
 }
