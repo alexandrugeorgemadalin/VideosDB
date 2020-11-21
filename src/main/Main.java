@@ -3,11 +3,11 @@ package main;
 import checker.Checkstyle;
 import checker.Checker;
 import common.Constants;
-import fileio.Input;
-import fileio.InputLoader;
-import fileio.SerialInputData;
-import fileio.Writer;
+import fileio.*;
+import main.Recommendations.BasicUser;
+import main.Recommendations.PremiumUser;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -79,6 +79,7 @@ public final class Main {
         ArrayList<Rating.Show> showratings = new ArrayList<Rating.Show>();
         ArrayList<Query.VideoQuery.Data> moviesdata = new ArrayList<>();
         ArrayList<Query.VideoQuery.Data> showsdata = new ArrayList<>();
+
         for (int i = 0; i < input.getCommands().size(); i++) {
             if (input.getCommands().get(i).getActionType().equals("command")) {
                 if (input.getCommands().get(i).getType().equals("favorite")) {
@@ -183,10 +184,120 @@ public final class Main {
                                 showsdata, filters, arrayResult, fileWriter);
                     }
                 }
-                if (input.getCommands().get(i).getObjectType().equals("users")){
+                if (input.getCommands().get(i).getObjectType().equals("users")) {
                     Query.UsersQuery usersquery = new Query.UsersQuery();
-                    usersquery.ratingsnumber(id,sorttype,number,input,movieratings,
-                            showratings,arrayResult,fileWriter);
+                    usersquery.ratingsnumber(id, sorttype, number, input, movieratings,
+                            showratings, arrayResult, fileWriter);
+                }
+            }
+            if (input.getCommands().get(i).getActionType().equals("recommendation")) {
+                int id = input.getCommands().get(i).getActionId();
+                if (input.getCommands().get(i).getType().equals("standard")) {
+                    boolean ok = false;
+                    for (UserInputData user : input.getUsers()) {
+                        if (user.getUsername().equals(input.getCommands().get(i).getUsername())) {
+                            BasicUser.standard(id, user, input, arrayResult, fileWriter);
+                            ok = true;
+                            break;
+                        }
+                    }
+                    if (!ok) {
+                        JSONObject result = new JSONObject();
+                        try {
+                            result = fileWriter.writeFile(id, "message",
+                                    "BestRatedUnseenRecommendation cannot be applied!");
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        arrayResult.add(result);
+                    }
+                }
+                if (input.getCommands().get(i).getType().equals("best_unseen")) {
+                    boolean ok = false;
+                    for (UserInputData user : input.getUsers()) {
+                        if (user.getUsername().equals(input.getCommands().get(i).getUsername())) {
+                            BasicUser.bestunseed(id, user, movieratings, showratings, input, arrayResult, fileWriter);
+                            ok = true;
+                            break;
+                        }
+                    }
+                    if (!ok) {
+                        JSONObject result = new JSONObject();
+                        try {
+                            result = fileWriter.writeFile(id, "message",
+                                    "BestRatedUnseenRecommendation cannot be applied!");
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        arrayResult.add(result);
+                    }
+                }
+                if (input.getCommands().get(i).getType().equals("search")) {
+                    boolean ok = false;
+                    for (UserInputData user : input.getUsers()) {
+                        if (user.getUsername().equals(input.getCommands().get(i).getUsername())) {
+                            if (user.getSubscriptionType().equals("PREMIUM")) {
+                                PremiumUser.search(id, user, input.getCommands().get(i).getGenre(),
+                                        movieratings, showratings, input, arrayResult, fileWriter);
+                                ok = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!ok) {
+                        JSONObject result = new JSONObject();
+                        try {
+                            result = fileWriter.writeFile(id, "message",
+                                    "SearchRecommendation cannot be applied!");
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        arrayResult.add(result);
+                    }
+                }
+                if (input.getCommands().get(i).getType().equals("favorite")) {
+                    boolean ok = false;
+                    for (UserInputData user : input.getUsers()) {
+                        if (user.getUsername().equals(input.getCommands().get(i).getUsername())) {
+                            if (user.getSubscriptionType().equals("PREMIUM")) {
+                                PremiumUser.favorite(id, user, input, arrayResult, fileWriter);
+                                ok = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!ok) {
+                        JSONObject result = new JSONObject();
+                        try {
+                            result = fileWriter.writeFile(id, "message",
+                                    "FavoriteRecommendation cannot be applied!");
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        arrayResult.add(result);
+                    }
+                }
+                if (input.getCommands().get(i).getType().equals("popular")) {
+                    boolean ok = false;
+                    for (UserInputData user : input.getUsers()) {
+                        if (user.getUsername().equals(input.getCommands().get(i).getUsername())) {
+                            if (user.getSubscriptionType().equals("PREMIUM")) {
+                                PremiumUser.popular(id, user, input, arrayResult, fileWriter);
+                                ok = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!ok) {
+                        JSONObject result = new JSONObject();
+                        try {
+                            result = fileWriter.writeFile(id, "message",
+                                    "PopularRecommendation cannot be applied!");
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        arrayResult.add(result);
+                    }
                 }
             }
 
