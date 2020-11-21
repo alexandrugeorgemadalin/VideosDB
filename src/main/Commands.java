@@ -45,13 +45,12 @@ public final class Commands {
         for (UserInputData user : usersData) {
             if (user.getUsername().equals(username)) {
                 if (user.getHistory().containsKey(title)) {
-                    user.getHistory().put(String.valueOf(user.getHistory()),
-                            user.getHistory().get(title) + 1);
+                    user.getHistory().replace(title,user.getHistory().get(title)+1);
                     result = fileWriter.writeFile(id, "message",
                             "success -> " + title + " was viewed with total views of "
                                     + user.getHistory().get(title));
                 } else {
-                    user.getHistory().put(String.valueOf(user.getHistory()), 1);
+                    user.getHistory().put(title, 1);
                     result = fileWriter.writeFile(id, "message",
                             "success -> " + title + " was viewed with total views of " + 1);
                 }

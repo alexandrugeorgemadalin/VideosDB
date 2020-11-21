@@ -785,8 +785,10 @@ public class Query {
                     }
                     if (ok) {
                         if (movie.getNo_fav() != 0) {
-                            sortedmovies.add(movie.getName());
-                            index += 1;
+                            if(!sortedmovies.contains(movie.getName())) {
+                                sortedmovies.add(movie.getName());
+                                index += 1;
+                            }
                         }
                     }
                 }
@@ -830,8 +832,10 @@ public class Query {
                     }
                     if (ok) {
                         if (show.getNo_fav() != 0) {
-                            sortedshows.add(show.getName());
-                            index += 1;
+                            if(!sortedshows.contains(show.getName())) {
+                                sortedshows.add(show.getName());
+                                index += 1;
+                            }
                         }
                     }
                 }
@@ -925,7 +929,6 @@ public class Query {
                     }
                 }
                 if (ratings != 0) {
-                    System.out.println(user.getUsername());
                     User u = new User(user.getUsername(), ratings);
                     ratedusers.add(u);
                 }

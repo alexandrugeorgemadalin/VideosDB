@@ -2,7 +2,7 @@ package main;
 
 public class Rating {
 
-    static class Movie {
+    public static class Movie {
         private String name;
         private String username;
         private Double rating;
@@ -47,7 +47,7 @@ public class Rating {
         }
     }
 
-    static class Show {
+    public static class Show {
         private String name;
         private int seasonnumber;
         private int season;
