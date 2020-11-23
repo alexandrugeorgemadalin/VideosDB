@@ -28,18 +28,27 @@ public class Query {
             movie1.setAveragerating(average);
         }
 
-        for (Rating.Show show1 : showratings) {
-            numratings = 0;
-            average = 0;
+        for (Rating.Show show : showratings) {
+            double[] ratings = new double[show.getSeasonnumber()];
+            int[] noratings = new int[show.getSeasonnumber()];
+            for (int i = 0; i < show.getSeasonnumber(); i++) {
+                ratings[i] = 0;
+                noratings[i] = 0;
+            }
             for (Rating.Show show2 : showratings) {
-                if (show1.getName().equals(show2.getName())) {
-                    average += show2.getRating();
-                    numratings += 1;
+                if (show.getName().equals(show2.getName())) {
+                    ratings[show2.getSeason() - 1] += show2.getRating();
+                    noratings[show2.getSeason() - 1] += 1;
                 }
             }
-            average /= numratings;
-            average /= show1.getSeasonnumber();
-            show1.setAveragerating(average);
+            average = 0;
+            for (int i = 0; i < show.getSeasonnumber(); i++) {
+                if (ratings[i] != 0) {
+                    average += ratings[i] / noratings[i];
+                }
+            }
+            average /= show.getSeasonnumber();
+            show.setAveragerating(average);
         }
     }
 
@@ -50,17 +59,18 @@ public class Query {
             private Double rating;
             private Integer awardsnumber;
 
-            public Integer getAwardsnumber() {
-                return awardsnumber;
-            }
-
-            public void setAwardsnumber(Integer awardsnumber) {
-                this.awardsnumber = awardsnumber;
-            }
 
             Actors(final String name, final Double rating) {
                 this.name = name;
                 this.rating = rating;
+            }
+
+            @Override
+            public String toString() {
+                return "Actors{" +
+                        "name='" + name + '\'' +
+                        ", rating=" + rating +
+                        '}';
             }
 
             Actors(final String name, final int awardsnumber) {
@@ -91,6 +101,15 @@ public class Query {
                     return a.name.compareTo(b.name);
                 }
                 return a.rating.compareTo(b.rating);
+            }
+        }
+
+        class SortbyRatingDesc implements Comparator<Actors> {
+            public int compare(final Actors a, final Actors b) {
+                if (b.rating.compareTo(a.rating) == 0) {
+                    return b.name.compareTo(a.name);
+                }
+                return b.rating.compareTo(a.rating);
             }
         }
 
@@ -127,36 +146,31 @@ public class Query {
                 Actors act = new Actors(actor.getName(), average);
                 ratedactors.add(act);
             }
-            Collections.sort(ratedactors, new SortbyRating());
+
             if (sorttype.equals("asc")) {
-                ArrayList<String> names = new ArrayList<String>();
-                for (int i = 0; i < number; i++) {
-                    if (ratedactors.get(i).getRating() != null) {
-                        names.add(ratedactors.get(i).name);
-                    }
-                }
-                try {
-                    result = fileWriter.writeFile(id, "message",
-                            "Query result: " + names.toString());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                arrayResult.add(result);
+                Collections.sort(ratedactors, new SortbyRating());
             } else {
-                ArrayList<String> names = new ArrayList<String>();
-                for (int i = ratedactors.size() - 1; i >= ratedactors.size() - number; i -= 1) {
-                    if (ratedactors.get(i).getRating() != null) {
-                        names.add(ratedactors.get(i).name);
-                    }
-                }
-                try {
-                    result = fileWriter.writeFile(id, "message",
-                            "Query result: " + names.toString());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                arrayResult.add(result);
+                Collections.sort(ratedactors, new SortbyRatingDesc());
             }
+
+            ArrayList<String> names = new ArrayList<String>();
+            int index = 0;
+            for (int i = 0; i < ratedactors.size(); i++) {
+                if (index == number) {
+                    break;
+                }
+                if (ratedactors.get(i).getRating() > 0) {
+                    names.add(ratedactors.get(i).name);
+                    index++;
+                }
+            }
+            try {
+                result = fileWriter.writeFile(id, "message",
+                        "Query result: " + names.toString());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            arrayResult.add(result);
 
         }
 
@@ -174,14 +188,16 @@ public class Query {
                            final List<ActorInputData> actors,
                            final JSONArray arrayResult, final Writer fileWriter) {
             JSONObject result = new JSONObject();
-            ArrayList<Actors> awardedactors = new ArrayList<Actors>();
+            ArrayList<Actors> awardedactors = new ArrayList<>();
+            boolean ok = true;
             int awardsnum;
             for (ActorInputData actor : actors) {
                 awardsnum = 0;
+                for (Integer no_award : actor.getAwards().values()) {
+                    awardsnum += no_award;
+                }
                 for (String award : awards) {
-                    if (actor.getAwards().containsKey(ActorsAwards.valueOf(award))) {
-                        awardsnum += actor.getAwards().get(ActorsAwards.valueOf(award));
-                    } else {
+                    if (!actor.getAwards().containsKey(ActorsAwards.valueOf(award))) {
                         awardsnum = -1;
                         break;
                     }
@@ -191,14 +207,14 @@ public class Query {
                     awardedactors.add(a);
                 }
             }
+
             Collections.sort(awardedactors, new SortbyAwards());
+            ArrayList<String> names = new ArrayList<>();
+            for (Actors actor : awardedactors) {
+                names.add(actor.getName());
+            }
+
             if (sorttype.equals("asc")) {
-                ArrayList<String> names = new ArrayList<String>();
-                for (int i = 0; i < number & i < awardedactors.size(); i++) {
-                    if (awardedactors.get(i).getAwardsnumber() != null) {
-                        names.add(awardedactors.get(i).name);
-                    }
-                }
                 try {
                     result = fileWriter.writeFile(id, "message",
                             "Query result: " + names.toString());
@@ -207,13 +223,7 @@ public class Query {
                 }
                 arrayResult.add(result);
             } else {
-                ArrayList<String> names = new ArrayList<String>();
-                for (int i = awardedactors.size() - 1;
-                     i >= awardedactors.size() - number & i > 0; i -= 1) {
-                    if (awardedactors.get(i).getAwardsnumber() != null) {
-                        names.add(awardedactors.get(i).name);
-                    }
-                }
+                Collections.reverse(names);
                 try {
                     result = fileWriter.writeFile(id, "message",
                             "Query result: " + names.toString());
@@ -228,23 +238,28 @@ public class Query {
                            final List<ActorInputData> actors,
                            final JSONArray arrayResult, final Writer fileWriter) {
             JSONObject result = new JSONObject();
-            ArrayList<String> filteredactors = new ArrayList<String>();
-            boolean ok;
+            ArrayList<String> filteredactors = new ArrayList<>();
+            int found, filtersno;
             for (ActorInputData actor : actors) {
-                ok = true;
+                found = 0;
+                filtersno = 0;
+                String[] words = actor.getCareerDescription().split("[-.,;()\\s]+");
                 for (List<String> filter : filters) {
                     if (filter != null) {
                         for (String subfilter : filter) {
                             if (subfilter != null) {
-                                if (!actor.getCareerDescription().contains(subfilter)) {
-                                    ok = false;
-                                    break;
+                                filtersno += 1;
+                                for (String w : words) {
+                                    if (w.toLowerCase().equals(subfilter)) {
+                                        found += 1;
+                                        break;
+                                    }
                                 }
                             }
                         }
                     }
                 }
-                if (ok) {
+                if (found == filtersno) {
                     filteredactors.add(actor.getName());
                 }
             }
@@ -281,16 +296,6 @@ public class Query {
             public Data() {
             }
 
-            public Data(String name, Double rating,
-                        Integer duration, Integer no_views,
-                        ArrayList<String> genre, Integer no_fav) {
-                this.name = name;
-                this.rating = rating;
-                this.duration = duration;
-                this.no_views = no_views;
-                this.genre = genre;
-                this.no_fav = no_fav;
-            }
 
             public Integer getNo_fav() {
                 return no_fav;
@@ -300,14 +305,12 @@ public class Query {
                 this.no_fav = no_fav;
             }
 
+
             @Override
             public String toString() {
                 return "Data{" +
                         "name='" + name + '\'' +
                         ", rating=" + rating +
-                        ", duration=" + duration +
-                        ", no_views=" + no_views +
-                        ", genre=" + genre +
                         '}';
             }
 
@@ -381,8 +384,8 @@ public class Query {
                 }
                 int no_favs = 0;
                 for (UserInputData user : users) {
-                    if (user.getHistory().containsKey(data.getName())) {
-                        no_favs += user.getHistory().getOrDefault(data.getName(), 0);
+                    if (user.getFavoriteMovies().contains(data.getName())) {
+                        no_favs += 1;
                     }
                 }
                 data.setNo_fav(no_favs);
@@ -412,14 +415,125 @@ public class Query {
                 }
                 int no_favs = 0;
                 for (UserInputData user : users) {
-                    if (user.getHistory().containsKey(data.getName())) {
-                        no_favs += user.getHistory().getOrDefault(data.getName(), 0);
+                    if (user.getFavoriteMovies().contains(data.getName())) {
+                        no_favs += 1;
                     }
                 }
                 data.setNo_fav(no_favs);
                 showsdata.add(data);
             }
         }
+
+        class SortbyRating implements Comparator<VideoQuery.Data> {
+            public int compare(final VideoQuery.Data a, final VideoQuery.Data b) {
+                if (a.getRating().compareTo(b.getRating()) == 0) {
+                    return a.getName().compareTo(b.getName());
+                }
+                return a.getRating().compareTo(b.getRating());
+            }
+        }
+
+        class SortbyRatingDesc implements Comparator<VideoQuery.Data> {
+            public int compare(final VideoQuery.Data a, final VideoQuery.Data b) {
+                if (b.getRating().compareTo(a.getRating()) == 0) {
+                    return b.getName().compareTo(a.getName());
+                }
+                return b.getRating().compareTo(a.getRating());
+            }
+        }
+
+        public void rating(final int id, final String sorttype,
+                           final String videotype, final int number,
+                           final ArrayList<Data> moviesdata,
+                           final ArrayList<Data> showsdata,
+                           List<List<String>> filters,
+                           final JSONArray arrayResult, final Writer fileWriter) {
+            JSONObject result = new JSONObject();
+            if (videotype.equals("movies")) {
+                ArrayList<String> sortedmovies = new ArrayList<>();
+                Collections.sort(moviesdata, new SortbyRating());
+                int index = 0;
+                boolean ok;
+                for (Data movie : moviesdata) {
+                    if (index == number | movie.getRating() == null)
+                        break;
+                    ok = true;
+                    for (List<String> filter : filters) {
+                        if (filter != null) {
+                            for (String subfilter : filter) {
+                                if (subfilter != null) {
+                                    if (!movie.getGenre().contains(subfilter)) {
+                                        ok = false;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (ok & !sortedmovies.contains(movie.getName()) & movie.getRating() > 0) {
+                        sortedmovies.add(movie.getName());
+                        index += 1;
+                    }
+                }
+
+                if (sorttype.equals("asc")) {
+                    try {
+                        result = fileWriter.writeFile(id, "message",
+                                "Query result: " + sortedmovies.toString());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    Collections.reverse(sortedmovies);
+                    try {
+                        result = fileWriter.writeFile(id, "message",
+                                "Query result: " + sortedmovies.toString());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                arrayResult.add(result);
+            } else {
+                ArrayList<String> sortedshows = new ArrayList<>();
+                if (sorttype.equals("asc")) {
+                    Collections.sort(showsdata, new SortbyRating());
+                } else {
+                    Collections.sort(showsdata, new SortbyRatingDesc());
+                }
+                int index = 0;
+                boolean ok;
+                for (Data show : showsdata) {
+                    if (index == number | show.getRating() == null)
+                        break;
+                    ok = true;
+                    for (List<String> filter : filters) {
+                        if (filter != null) {
+                            for (String subfilter : filter) {
+                                if (subfilter != null) {
+                                    if (!show.getGenre().contains(subfilter)) {
+                                        ok = false;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (ok & !sortedshows.contains(show.getName()) & show.getRating() != 0) {
+                        sortedshows.add(show.getName());
+                        index += 1;
+                    }
+                }
+                try {
+                    result = fileWriter.writeFile(id, "message",
+                            "Query result: " + sortedshows.toString());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                arrayResult.add(result);
+
+            }
+        }
+
 
         class SortbyDuration implements Comparator<VideoQuery.Data> {
             public int compare(final VideoQuery.Data a, final VideoQuery.Data b) {
@@ -430,12 +544,12 @@ public class Query {
             }
         }
 
-        public void rating(final int id, final String sorttype,
-                           final String videotype, final int number,
-                           final ArrayList<Data> moviesdata,
-                           final ArrayList<Data> showsdata,
-                           List<List<String>> filters,
-                           final JSONArray arrayResult, final Writer fileWriter) {
+        public void longest(final int id, final String sorttype,
+                            final String videotype, final int number,
+                            final ArrayList<Data> moviesdata,
+                            final ArrayList<Data> showsdata,
+                            List<List<String>> filters,
+                            final JSONArray arrayResult, final Writer fileWriter) {
             JSONObject result = new JSONObject();
             if (videotype.equals("movies")) {
                 ArrayList<String> sortedmovies = new ArrayList<>();
@@ -458,7 +572,7 @@ public class Query {
                             }
                         }
                     }
-                    if (ok) {
+                    if (ok & !sortedmovies.contains(movie.getName())) {
                         sortedmovies.add(movie.getName());
                         index += 1;
                     }
@@ -501,114 +615,7 @@ public class Query {
                             }
                         }
                     }
-                    if (ok) {
-                        sortedshows.add(show.getName());
-                        index += 1;
-                    }
-                }
-                if (sorttype.equals("asc")) {
-                    try {
-                        result = fileWriter.writeFile(id, "message",
-                                "Query result: " + sortedshows.toString());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    Collections.reverse(sortedshows);
-                    try {
-                        result = fileWriter.writeFile(id, "message",
-                                "Query result: " + sortedshows.toString());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                arrayResult.add(result);
-
-            }
-        }
-
-        class SortbyRating implements Comparator<VideoQuery.Data> {
-            public int compare(final VideoQuery.Data a, final VideoQuery.Data b) {
-                if (a.getRating().compareTo(b.getRating()) == 0) {
-                    return a.getName().compareTo(b.getName());
-                }
-                return a.getRating().compareTo(b.getRating());
-            }
-        }
-
-
-        public void longest(final int id, final String sorttype,
-                            final String videotype, final int number,
-                            final ArrayList<Data> moviesdata,
-                            final ArrayList<Data> showsdata,
-                            List<List<String>> filters,
-                            final JSONArray arrayResult, final Writer fileWriter) {
-            JSONObject result = new JSONObject();
-            if (videotype.equals("movies")) {
-                ArrayList<String> sortedmovies = new ArrayList<>();
-                Collections.sort(moviesdata, new SortbyRating());
-                int index = 0;
-                boolean ok;
-                for (Data movie : moviesdata) {
-                    if (index == number | movie.getRating() == null)
-                        break;
-                    ok = true;
-                    for (List<String> filter : filters) {
-                        if (filter != null) {
-                            for (String subfilter : filter) {
-                                if (subfilter != null) {
-                                    if (!movie.getGenre().contains(subfilter)) {
-                                        ok = false;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    if (ok) {
-                        sortedmovies.add(movie.getName());
-                        index += 1;
-                    }
-                }
-                if (sorttype.equals("asc")) {
-                    try {
-                        result = fileWriter.writeFile(id, "message",
-                                "Query result: " + sortedmovies.toString());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    Collections.reverse(sortedmovies);
-                    try {
-                        result = fileWriter.writeFile(id, "message",
-                                "Query result: " + sortedmovies.toString());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                arrayResult.add(result);
-            } else {
-                ArrayList<String> sortedshows = new ArrayList<>();
-                Collections.sort(showsdata, new SortbyRating());
-                int index = 0;
-                boolean ok;
-                for (Data show : showsdata) {
-                    if (index == number | show.getRating() == null)
-                        break;
-                    ok = true;
-                    for (List<String> filter : filters) {
-                        if (filter != null) {
-                            for (String subfilter : filter) {
-                                if (subfilter != null) {
-                                    if (!show.getGenre().contains(subfilter)) {
-                                        ok = false;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    if (ok) {
+                    if (ok & !sortedshows.contains(show.getName())) {
                         sortedshows.add(show.getName());
                         index += 1;
                     }
@@ -643,6 +650,14 @@ public class Query {
             }
         }
 
+        class SortbyViewsDesc implements Comparator<VideoQuery.Data> {
+            public int compare(final VideoQuery.Data a, final VideoQuery.Data b) {
+                if (b.getNo_views().compareTo(a.getNo_views()) == 0) {
+                    return b.getName().compareTo(a.getName());
+                }
+                return b.getNo_views().compareTo(a.getNo_views());
+            }
+        }
 
         public void mostviewed(final int id, final String sorttype,
                                final String videotype, final int number,
@@ -653,7 +668,11 @@ public class Query {
             JSONObject result = new JSONObject();
             if (videotype.equals("movies")) {
                 ArrayList<String> sortedmovies = new ArrayList<>();
-                Collections.sort(moviesdata, new SortbyViews());
+                if (sorttype.equals("asc")) {
+                    Collections.sort(moviesdata, new SortbyViews());
+                } else {
+                    Collections.sort(moviesdata, new SortbyViewsDesc());
+                }
                 int index = 0;
                 boolean ok;
                 for (Data movie : moviesdata) {
@@ -673,32 +692,26 @@ public class Query {
                         }
                     }
                     if (ok) {
-                        if (movie.getNo_views() != 0) {
+                        if (movie.getNo_views() != 0 & !sortedmovies.contains(movie.getName())) {
                             sortedmovies.add(movie.getName());
                             index += 1;
                         }
                     }
                 }
-                if (sorttype.equals("asc")) {
-                    try {
-                        result = fileWriter.writeFile(id, "message",
-                                "Query result: " + sortedmovies.toString());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    Collections.reverse(sortedmovies);
-                    try {
-                        result = fileWriter.writeFile(id, "message",
-                                "Query result: " + sortedmovies.toString());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                try {
+                    result = fileWriter.writeFile(id, "message",
+                            "Query result: " + sortedmovies.toString());
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
                 arrayResult.add(result);
             } else {
                 ArrayList<String> sortedshows = new ArrayList<>();
-                Collections.sort(showsdata, new SortbyViews());
+                if (sorttype.equals("asc")) {
+                    Collections.sort(showsdata, new SortbyViews());
+                } else {
+                    Collections.sort(showsdata, new SortbyViewsDesc());
+                }
                 int index = 0;
                 boolean ok;
                 for (Data show : showsdata) {
@@ -718,27 +731,17 @@ public class Query {
                         }
                     }
                     if (ok) {
-                        if (show.getNo_views() != 0) {
+                        if (show.getNo_views() != 0 & !sortedshows.contains(show.getName())) {
                             sortedshows.add(show.getName());
                             index += 1;
                         }
                     }
                 }
-                if (sorttype.equals("asc")) {
-                    try {
-                        result = fileWriter.writeFile(id, "message",
-                                "Query result: " + sortedshows.toString());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    Collections.reverse(sortedshows);
-                    try {
-                        result = fileWriter.writeFile(id, "message",
-                                "Query result: " + sortedshows.toString());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                try {
+                    result = fileWriter.writeFile(id, "message",
+                            "Query result: " + sortedshows.toString());
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
                 arrayResult.add(result);
 
@@ -754,6 +757,14 @@ public class Query {
             }
         }
 
+        class SortbyFavoriteDesc implements Comparator<VideoQuery.Data> {
+            public int compare(final VideoQuery.Data a, final VideoQuery.Data b) {
+                if (b.getNo_fav().compareTo(a.getNo_fav()) == 0) {
+                    return b.getName().compareTo(a.getName());
+                }
+                return b.getNo_fav().compareTo(a.getNo_fav());
+            }
+        }
 
         public void favorite(final int id, final String sorttype,
                              final String videotype, final int number,
@@ -764,7 +775,11 @@ public class Query {
             JSONObject result = new JSONObject();
             if (videotype.equals("movies")) {
                 ArrayList<String> sortedmovies = new ArrayList<>();
-                Collections.sort(moviesdata, new SortbyFavorite());
+                if (sorttype.equals("asc")) {
+                    Collections.sort(moviesdata, new SortbyFavorite());
+                } else {
+                    Collections.sort(moviesdata, new SortbyFavoriteDesc());
+                }
                 int index = 0;
                 boolean ok;
                 for (Data movie : moviesdata) {
@@ -785,28 +800,18 @@ public class Query {
                     }
                     if (ok) {
                         if (movie.getNo_fav() != 0) {
-                            if(!sortedmovies.contains(movie.getName())) {
+                            if (!sortedmovies.contains(movie.getName())) {
                                 sortedmovies.add(movie.getName());
                                 index += 1;
                             }
                         }
                     }
                 }
-                if (sorttype.equals("asc")) {
-                    try {
-                        result = fileWriter.writeFile(id, "message",
-                                "Query result: " + sortedmovies.toString());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    Collections.reverse(sortedmovies);
-                    try {
-                        result = fileWriter.writeFile(id, "message",
-                                "Query result: " + sortedmovies.toString());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                try {
+                    result = fileWriter.writeFile(id, "message",
+                            "Query result: " + sortedmovies.toString());
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
                 arrayResult.add(result);
             } else {
@@ -832,7 +837,7 @@ public class Query {
                     }
                     if (ok) {
                         if (show.getNo_fav() != 0) {
-                            if(!sortedshows.contains(show.getName())) {
+                            if (!sortedshows.contains(show.getName())) {
                                 sortedshows.add(show.getName());
                                 index += 1;
                             }
@@ -865,10 +870,6 @@ public class Query {
         static class User {
             private String username;
             private Integer ratings;
-
-            public User() {
-
-            }
 
             @Override
             public String toString() {
@@ -934,22 +935,24 @@ public class Query {
                 }
             }
             Collections.sort(ratedusers, new SortbyRatings());
-            if (sorttype.equals("asc")) {
-                try {
-                    result = fileWriter.writeFile(id, "message",
-                            "Query result: " + ratedusers.toString());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } else {
+            if (sorttype.equals("desc")) {
                 Collections.reverse(ratedusers);
-                try {
-                    result = fileWriter.writeFile(id, "message",
-                            "Query result: " + ratedusers.toString());
-                } catch (IOException e) {
-                    e.printStackTrace();
+            }
+            ArrayList<String> names = new ArrayList<>();
+            int index = 0;
+            for (User user : ratedusers) {
+                if (index != number) {
+                    index++;
+                    names.add(user.getUsername());
                 }
             }
+            try {
+                result = fileWriter.writeFile(id, "message",
+                        "Query result: " + names);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             arrayResult.add(result);
 
         }

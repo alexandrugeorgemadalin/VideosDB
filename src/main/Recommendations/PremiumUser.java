@@ -1,8 +1,6 @@
 package main.Recommendations;
 
-import entertainment.Genre;
 import fileio.*;
-import main.Query;
 import main.Rating;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -11,7 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Map;
+
 
 public class PremiumUser {
     static class Video {
@@ -19,6 +17,7 @@ public class PremiumUser {
         private Double rating;
         private Integer views;
         private String genre;
+        private int no_favs;
 
         public Video(Integer views, String genre) {
             this.views = views;
@@ -34,6 +33,11 @@ public class PremiumUser {
             return name;
         }
 
+        public Video(String name, Integer views, int no_favs) {
+            this.name = name;
+            this.views = views;
+            this.no_favs = no_favs;
+        }
 
         public void setGenre(String genre) {
             this.genre = genre;
@@ -157,9 +161,10 @@ public class PremiumUser {
             Integer no_views = 0;
             if (!user.getHistory().containsKey(movie.getTitle())) {
                 for (UserInputData u : input.getUsers()) {
-                    if (u.getHistory().containsKey(movie.getTitle())) {
-                        no_views += u.getHistory().getOrDefault(movie.getTitle(), 0);
+                    if (u.getFavoriteMovies().contains(movie.getTitle())) {
+                        no_views += 1;
                     }
+
                 }
             }
             Video v = new Video(movie.getTitle(), no_views);
@@ -169,8 +174,8 @@ public class PremiumUser {
             Integer no_views = 0;
             if (!user.getHistory().containsKey(show.getTitle())) {
                 for (UserInputData u : input.getUsers()) {
-                    if (u.getHistory().containsKey(show.getTitle())) {
-                        no_views += u.getHistory().getOrDefault(show.getTitle(), 0);
+                    if (u.getFavoriteMovies().contains(show.getTitle())) {
+                        no_views += 1;
                     }
                 }
             }
@@ -180,25 +185,27 @@ public class PremiumUser {
         Collections.sort(videos, new SortbyViews());
         if (videos.size() != 0) {
             boolean ok = false;
-            for(Video video:videos){
-                for(UserInputData u: input.getUsers()){
-                    if(u.getFavoriteMovies().contains(video.getName())){
-                        try {
-                            result = fileWriter.writeFile(id, "message",
-                                    "FavoriteRecommendation result: " + video.getName());
-                        } catch (IOException e) {
-                            e.printStackTrace();
+            for (Video video : videos) {
+                for (UserInputData u : input.getUsers()) {
+                    if (u.getFavoriteMovies().contains(video.getName())) {
+                        if (!user.getHistory().containsKey(video.getName()) ) {
+                            try {
+                                result = fileWriter.writeFile(id, "message",
+                                        "FavoriteRecommendation result: " + video.getName());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            arrayResult.add(result);
+                            ok = true;
+                            break;
                         }
-                        arrayResult.add(result);
-                        ok = true;
-                        break;
                     }
                 }
-                if(ok){
+                if (ok) {
                     break;
                 }
             }
-            if(!ok){
+            if (!ok) {
                 try {
                     result = fileWriter.writeFile(id, "message",
                             "FavoriteRecommendation cannot be applied!");
@@ -207,8 +214,7 @@ public class PremiumUser {
                 }
                 arrayResult.add(result);
             }
-        }
-        else{
+        } else {
             try {
                 result = fileWriter.writeFile(id, "message",
                         "FavoriteRecommendation cannot be applied!");
