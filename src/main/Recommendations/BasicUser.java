@@ -1,6 +1,10 @@
 package main.Recommendations;
 
-import fileio.*;
+import fileio.SerialInputData;
+import fileio.Writer;
+import fileio.Input;
+import fileio.UserInputData;
+import fileio.MovieInputData;
 import main.Rating;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -19,15 +23,8 @@ public class BasicUser {
             return name;
         }
 
-        @Override
-        public String toString() {
-            return "Video{" +
-                    "name='" + name + '\'' +
-                    ", rating=" + rating +
-                    '}';
-        }
 
-        public void setName(String name) {
+        public void setName(final String name) {
             this.name = name;
         }
 
@@ -35,16 +32,23 @@ public class BasicUser {
             return rating;
         }
 
-        public void setRating(Double rating) {
+        public void setRating(final Double rating) {
             this.rating = rating;
         }
 
-        public Video(String name, Double rating) {
+        Video(final String name, final Double rating) {
             this.name = name;
             this.rating = rating;
         }
     }
 
+    /**
+     * @param id          id-ul comenzii
+     * @param user        user-ul pentru care se efectueaza comanda
+     * @param input       input-ul testului
+     * @param arrayResult rezultatul ce urmeaza sa fie scris
+     * @param fileWriter  The file where the data will be written
+     */
     public static void standard(final int id, final UserInputData user, final Input input,
                                 final JSONArray arrayResult, final Writer fileWriter) {
         JSONObject result = new JSONObject();
@@ -88,6 +92,15 @@ public class BasicUser {
         }
     }
 
+    /**
+     * @param id           id-ul comenzii
+     * @param user         user-ul pentru care se efectueaza comanda
+     * @param movieratings clasa in care sunt salvate date relevante pentru filme
+     * @param showratings  clasa in care sunt salvate date relevante pentru filme
+     * @param input        input-ul testului
+     * @param arrayResult  rezultatul ce urmeaza sa fie scris
+     * @param fileWriter   The file where the data will be written
+     */
     public static void bestunseed(final int id, final UserInputData user,
                                   final ArrayList<Rating.Movie> movieratings,
                                   final ArrayList<Rating.Show> showratings,

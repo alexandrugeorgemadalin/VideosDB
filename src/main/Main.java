@@ -3,7 +3,16 @@ package main;
 import checker.Checkstyle;
 import checker.Checker;
 import common.Constants;
-import fileio.*;
+import fileio.SerialInputData;
+import fileio.InputLoader;
+import fileio.Writer;
+import fileio.Input;
+import fileio.UserInputData;
+import main.Commands.Commands;
+import main.Query.ActorsQuery;
+import main.Query.Query;
+import main.Query.UsersQuery;
+import main.Query.VideoQuery;
 import main.Recommendations.BasicUser;
 import main.Recommendations.PremiumUser;
 import org.json.simple.JSONArray;
@@ -77,8 +86,8 @@ public final class Main {
         //TODO add here the entry point to your implementation
         ArrayList<Rating.Movie> movieratings = new ArrayList<Rating.Movie>();
         ArrayList<Rating.Show> showratings = new ArrayList<Rating.Show>();
-        ArrayList<Query.VideoQuery.Data> moviesdata = new ArrayList<>();
-        ArrayList<Query.VideoQuery.Data> showsdata = new ArrayList<>();
+        ArrayList<VideoQuery.Data> moviesdata = new ArrayList<>();
+        ArrayList<VideoQuery.Data> showsdata = new ArrayList<>();
 
         for (int i = 0; i < input.getCommands().size(); i++) {
             if (input.getCommands().get(i).getActionType().equals("command")) {
@@ -121,30 +130,30 @@ public final class Main {
             }
             if (input.getCommands().get(i).getActionType().equals("query")) {
                 Query.calculateratings(movieratings, showratings);
-                Query.VideoQuery.getdata(moviesdata, showsdata, input, movieratings, showratings);
+                VideoQuery.getdata(moviesdata, showsdata, input, movieratings, showratings);
                 int id = input.getCommands().get(i).getActionId();
                 int number = input.getCommands().get(i).getNumber();
                 String sorttype = input.getCommands().get(i).getSortType();
                 if (input.getCommands().get(i).getObjectType().equals("actors")) {
-                    Query.ActorsQuery actorsquery = new Query.ActorsQuery();
+                    //ActorsQuery.Actors actorsquery = new ActorsQuery.Actors;
                     if (input.getCommands().get(i).getCriteria().equals("average")) {
-                        actorsquery.average(id, number, movieratings, sorttype,
+                        ActorsQuery.average(id, number, movieratings, sorttype,
                                 showratings, input.getActors(), arrayResult, fileWriter);
                     }
                     if (input.getCommands().get(i).getCriteria().equals("awards")) {
                         List<String> awards = input.getCommands().get(i).getFilters().get(3);
-                        actorsquery.awards(id, number, sorttype, awards,
+                        ActorsQuery.awards(id, number, sorttype, awards,
                                 input.getActors(), arrayResult, fileWriter);
                     }
                     if (input.getCommands().get(i).getCriteria().equals("filter_description")) {
                         List<List<String>> filters = input.getCommands().get(i).getFilters();
-                        actorsquery.filter(id, sorttype, filters,
+                        ActorsQuery.filter(id, sorttype, filters,
                                 input.getActors(), arrayResult, fileWriter);
                     }
                 }
                 if (input.getCommands().get(i).getObjectType().equals("movies")) {
                     String videotype = input.getCommands().get(i).getObjectType();
-                    Query.VideoQuery videoquery = new Query.VideoQuery();
+                    VideoQuery videoquery = new VideoQuery();
                     List<List<String>> filters = input.getCommands().get(i).getFilters();
                     if (input.getCommands().get(i).getCriteria().equals("ratings")) {
                         videoquery.rating(id, sorttype, videotype, number, moviesdata,
@@ -165,7 +174,7 @@ public final class Main {
                 }
                 if (input.getCommands().get(i).getObjectType().equals("shows")) {
                     String videotype = input.getCommands().get(i).getObjectType();
-                    Query.VideoQuery videoquery = new Query.VideoQuery();
+                    VideoQuery videoquery = new VideoQuery();
                     List<List<String>> filters = input.getCommands().get(i).getFilters();
                     if (input.getCommands().get(i).getCriteria().equals("ratings")) {
                         videoquery.rating(id, sorttype, videotype, number, moviesdata,
@@ -185,7 +194,7 @@ public final class Main {
                     }
                 }
                 if (input.getCommands().get(i).getObjectType().equals("users")) {
-                    Query.UsersQuery usersquery = new Query.UsersQuery();
+                    UsersQuery usersquery = new UsersQuery();
                     usersquery.ratingsnumber(id, sorttype, number, input, movieratings,
                             showratings, arrayResult, fileWriter);
                 }
@@ -216,7 +225,8 @@ public final class Main {
                     boolean ok = false;
                     for (UserInputData user : input.getUsers()) {
                         if (user.getUsername().equals(input.getCommands().get(i).getUsername())) {
-                            BasicUser.bestunseed(id, user, movieratings, showratings, input, arrayResult, fileWriter);
+                            BasicUser.bestunseed(id, user, movieratings,
+                                    showratings, input, arrayResult, fileWriter);
                             ok = true;
                             break;
                         }
