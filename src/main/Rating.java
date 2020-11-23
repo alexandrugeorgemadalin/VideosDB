@@ -64,6 +64,18 @@ public class Rating {
             this.seasonnumber = seasonnumber;
         }
 
+        @Override
+        public String toString() {
+            return "Show{" +
+                    "name='" + name + '\'' +
+                    ", seasonnumber=" + seasonnumber +
+                    ", season=" + season +
+                    ", username='" + username + '\'' +
+                    ", rating=" + rating +
+                    ", averagerating=" + averagerating +
+                    '}';
+        }
+
         public String getName() {
             return name;
         }

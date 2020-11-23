@@ -126,11 +126,26 @@ public class BasicUser {
                 e.printStackTrace();
             }
         } else {
-            try {
-                result = fileWriter.writeFile(id, "message",
-                        "BestRatedUnseenRecommendation result: " + input.getMovies().get(0).getTitle());
-            } catch (IOException e) {
-                e.printStackTrace();
+            boolean ok = false;
+            for (MovieInputData movie : input.getMovies()) {
+                if (!user.getHistory().containsKey(movie.getTitle())) {
+                    ok = true;
+                    try {
+                        result = fileWriter.writeFile(id, "message",
+                                "BestRatedUnseenRecommendation result: " + movie.getTitle());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                }
+            }
+            if (!ok) {
+                try {
+                    result = fileWriter.writeFile(id, "message",
+                            "BestRatedUnseenRecommendation cannot be applied!");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
         arrayResult.add(result);

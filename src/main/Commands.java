@@ -109,7 +109,7 @@ public final class Commands {
                     int error = 0;
                     for (Rating.Show s : ratings) {
                         if (s.getName().equals(title)) {
-                            if (s.getUsername().equals(username)) {
+                            if (s.getUsername().equals(username) & s.getSeason() == season) {
                                 result = fileWriter.writeFile(id, "message",
                                         "error -> " + title + " has been already rated");
                                 arrayResult.add(result);
