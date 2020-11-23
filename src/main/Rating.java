@@ -2,13 +2,13 @@ package main;
 
 public class Rating {
 
-    public static class Movie {
+    public static final class Movie {
         private String name;
         private String username;
         private Double rating;
         private Double averagerating = 0.00;
 
-        Movie(final String name, final String username, final Double rating) {
+        public Movie(final String name, final String username, final Double rating) {
             this.name = name;
             this.username = username;
             this.rating = rating;
@@ -47,7 +47,7 @@ public class Rating {
         }
     }
 
-    public static class Show {
+    public static final class Show {
         private String name;
         private int seasonnumber;
         private int season;
@@ -55,25 +55,13 @@ public class Rating {
         private Double rating;
         private Double averagerating = 0.00;
 
-        Show(final String name, final int season, final int seasonnumber,
-             final String username, final Double rating) {
+        public Show(final String name, final int season, final int seasonnumber,
+                    final String username, final Double rating) {
             this.name = name;
             this.season = season;
             this.username = username;
             this.rating = rating;
             this.seasonnumber = seasonnumber;
-        }
-
-        @Override
-        public String toString() {
-            return "Show{" +
-                    "name='" + name + '\'' +
-                    ", seasonnumber=" + seasonnumber +
-                    ", season=" + season +
-                    ", username='" + username + '\'' +
-                    ", rating=" + rating +
-                    ", averagerating=" + averagerating +
-                    '}';
         }
 
         public String getName() {

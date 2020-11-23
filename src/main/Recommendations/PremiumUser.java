@@ -1,6 +1,10 @@
 package main.Recommendations;
 
-import fileio.*;
+import fileio.SerialInputData;
+import fileio.Writer;
+import fileio.Input;
+import fileio.UserInputData;
+import fileio.MovieInputData;
 import main.Rating;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -17,9 +21,8 @@ public class PremiumUser {
         private Double rating;
         private Integer views;
         private String genre;
-        private int no_favs;
 
-        public Video(Integer views, String genre) {
+        Video(final Integer views, final String genre) {
             this.views = views;
             this.genre = genre;
         }
@@ -33,22 +36,16 @@ public class PremiumUser {
             return name;
         }
 
-        public Video(String name, Integer views, int no_favs) {
-            this.name = name;
-            this.views = views;
-            this.no_favs = no_favs;
-        }
-
-        public void setGenre(String genre) {
+        public void setGenre(final String genre) {
             this.genre = genre;
         }
 
-        public Video(String name, double rating) {
+        Video(final String name, final double rating) {
             this.name = name;
             this.rating = rating;
         }
 
-        public Video(String name, Integer views) {
+        Video(final String name, final Integer views) {
             this.name = name;
             this.views = views;
         }
@@ -57,7 +54,7 @@ public class PremiumUser {
             return views;
         }
 
-        public void setViews(Integer views) {
+        public void setViews(final Integer views) {
             this.views = views;
         }
 
@@ -66,7 +63,7 @@ public class PremiumUser {
             return name;
         }
 
-        public void setName(String name) {
+        public void setName(final String name) {
             this.name = name;
         }
 
@@ -74,7 +71,7 @@ public class PremiumUser {
             return rating;
         }
 
-        public void setRating(double rating) {
+        public void setRating(final double rating) {
             this.rating = rating;
         }
     }
@@ -88,6 +85,16 @@ public class PremiumUser {
         }
     }
 
+    /**
+     * @param id           id-ul comenzii
+     * @param user         user-ul pentru care se efectueaza comanda
+     * @param genre        genurile cautarii
+     * @param movieratings clasa in care sunt salvate date relevante pentru filme
+     * @param showratings  clasa in care sunt salvate date relevante pentru filme
+     * @param input        input-ul testului
+     * @param arrayResult  rezultatul ce urmeaza sa fie scris
+     * @param fileWriter   The file where the data will be written
+     */
     public static void search(final int id, final UserInputData user,
                               final String genre,
                               final ArrayList<Rating.Movie> movieratings,
@@ -152,34 +159,41 @@ public class PremiumUser {
         }
     }
 
+    /**
+     * @param id          id-ul comenzii
+     * @param user        user-ul pentru care se efectueaza comanda
+     * @param input       input-ul testului
+     * @param arrayResult rezultatul ce urmeaza sa fie scris
+     * @param fileWriter  The file where the data will be written
+     */
     public static void favorite(final int id, final UserInputData user,
                                 final Input input,
                                 final JSONArray arrayResult, final Writer fileWriter) {
         JSONObject result = new JSONObject();
         ArrayList<Video> videos = new ArrayList<>();
         for (MovieInputData movie : input.getMovies()) {
-            Integer no_views = 0;
+            Integer noviews = 0;
             if (!user.getHistory().containsKey(movie.getTitle())) {
                 for (UserInputData u : input.getUsers()) {
                     if (u.getFavoriteMovies().contains(movie.getTitle())) {
-                        no_views += 1;
+                        noviews += 1;
                     }
 
                 }
             }
-            Video v = new Video(movie.getTitle(), no_views);
+            Video v = new Video(movie.getTitle(), noviews);
             videos.add(v);
         }
         for (SerialInputData show : input.getSerials()) {
-            Integer no_views = 0;
+            Integer noviews = 0;
             if (!user.getHistory().containsKey(show.getTitle())) {
                 for (UserInputData u : input.getUsers()) {
                     if (u.getFavoriteMovies().contains(show.getTitle())) {
-                        no_views += 1;
+                        noviews += 1;
                     }
                 }
             }
-            Video v = new Video(show.getTitle(), no_views);
+            Video v = new Video(show.getTitle(), noviews);
             videos.add(v);
         }
         Collections.sort(videos, new SortbyViews());
@@ -188,7 +202,7 @@ public class PremiumUser {
             for (Video video : videos) {
                 for (UserInputData u : input.getUsers()) {
                     if (u.getFavoriteMovies().contains(video.getName())) {
-                        if (!user.getHistory().containsKey(video.getName()) ) {
+                        if (!user.getHistory().containsKey(video.getName())) {
                             try {
                                 result = fileWriter.writeFile(id, "message",
                                         "FavoriteRecommendation result: " + video.getName());
@@ -225,6 +239,13 @@ public class PremiumUser {
         }
     }
 
+    /**
+     * @param id          id-ul comenzii
+     * @param user        user-ul pentru care se efectueaza comanda
+     * @param input       input-ul testului
+     * @param arrayResult rezultatul ce urmeaza sa fie scris
+     * @param fileWriter  The file where the data will be written
+     */
     public static void popular(final int id, final UserInputData user,
                                final Input input,
                                final JSONArray arrayResult, final Writer fileWriter) {
