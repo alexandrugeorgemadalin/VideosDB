@@ -148,14 +148,13 @@ public final class ActorsQuery {
 
     /**
      * @param id          id-ul comenzii
-     * @param number      numarul de elemente ce trebuiesc returnate
      * @param sorttype    tipul sortarii
      * @param awards      liste de premii ce trebuiesc verificate
      * @param actors      datele de intrare ale actorilor
      * @param arrayResult rezultatul ce urmeaza sa fie scris
      * @param fileWriter  The file where the data will be written
      */
-    public static void awards(final int id, final int number, final String sorttype,
+    public static void awards(final int id, final String sorttype,
                               final List<String> awards,
                               final List<ActorInputData> actors,
                               final JSONArray arrayResult, final Writer fileWriter) {

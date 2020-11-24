@@ -53,12 +53,14 @@ public class BasicUser {
                                 final JSONArray arrayResult, final Writer fileWriter) {
         JSONObject result = new JSONObject();
         String recommmendation = null;
+        //cauta in lista de filme primul film care nu a fost vazut
         for (MovieInputData movie : input.getMovies()) {
             if (!user.getHistory().containsKey(movie.getTitle())) {
                 recommmendation = movie.getTitle();
                 break;
             }
         }
+        // daca nu a gasit in lista de filme, cauta apoi in lista de seriale
         if (recommmendation == null) {
             for (SerialInputData show : input.getSerials()) {
                 if (!user.getHistory().containsKey(show.getTitle())) {

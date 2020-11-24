@@ -142,7 +142,7 @@ public final class Main {
                     }
                     if (input.getCommands().get(i).getCriteria().equals("awards")) {
                         List<String> awards = input.getCommands().get(i).getFilters().get(3);
-                        ActorsQuery.awards(id, number, sorttype, awards,
+                        ActorsQuery.awards(id, sorttype, awards,
                                 input.getActors(), arrayResult, fileWriter);
                     }
                     if (input.getCommands().get(i).getCriteria().equals("filter_description")) {
